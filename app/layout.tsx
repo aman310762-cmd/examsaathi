@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("http://localhost:4173"),
+  metadataBase: new URL("https://examsaathi-eight.vercel.app"),
   title: { default: "ExamSaathi", template: "%s · ExamSaathi" },
   description: "Smart, affordable SSC CGL and CHSL preparation for every Indian student.",
   manifest: "/manifest.webmanifest",
