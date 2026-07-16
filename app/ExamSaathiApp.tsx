@@ -28,9 +28,12 @@ import {
   Lightbulb,
   ListChecks,
   LogOut,
+  Mail,
   Medal,
   Menu,
+  Moon,
   Pencil,
+  Phone,
   Plus,
   RotateCcw,
   Search,
@@ -39,18 +42,18 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  Sun,
   Target,
   Timer,
   Trophy,
   Users,
   UserRound,
-  WifiOff,
   X,
   XCircle,
   Zap,
 } from "lucide-react";
 import { createContext, FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { examInfo, Exam, Language, QUESTION_BANK_SIZE, Question, questions as seedQuestions, Subject, subjects } from "./questions";
+import { examInfo, Exam, Language, Question, questions as seedQuestions, Subject, subjects } from "./questions";
 import { chooseAdaptiveQuestion, seededQuestions } from "../lib/adaptive";
 import { buildTeachingNote } from "../lib/teaching-note";
 import { TeachingNotePanel } from "./TeachingNotePanel";
@@ -86,6 +89,7 @@ async function fetchPublishedQuestions() {
 
 type View = "dashboard" | "bank" | "practice" | "mock" | "planner" | "challenge" | "progress" | "mistakes" | "admin" | "settings";
 type PracticeMode = Subject | "mistakes" | { questionId: string };
+type Theme = "light" | "dark";
 
 type Profile = {
   name: string;
@@ -238,6 +242,15 @@ function Brand() {
   );
 }
 
+function GoogleMark() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19"><path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.91h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.32 2.98-7.4Z"/><path fill="#34A853" d="M12 22c2.7 0 4.97-.9 6.62-2.37l-3.24-2.54c-.9.6-2.05.96-3.38.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.62A10 10 0 0 0 12 22Z"/><path fill="#FBBC05" d="M6.39 13.92A6.01 6.01 0 0 1 6.08 12c0-.67.11-1.32.31-1.92V7.46H3.04A10 10 0 0 0 2 12c0 1.61.39 3.14 1.04 4.54l3.35-2.62Z"/><path fill="#EA4335" d="M12 5.95c1.47 0 2.78.5 3.82 1.49l2.87-2.87A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.96 5.46l3.35 2.62C7.18 7.71 9.39 5.95 12 5.95Z"/></svg>;
+}
+
+function ThemeToggle({ theme, onToggle, showLabel = false }: { theme: Theme; onToggle: () => void; showLabel?: boolean }) {
+  const next = theme === "light" ? "dark" : "light";
+  return <button className={`theme-toggle ${showLabel ? "with-label" : ""}`} type="button" onClick={onToggle} aria-label={`Switch to ${next} theme`} title={`Switch to ${next} theme`}>{theme === "light" ? <Moon size={18} /> : <Sun size={18} />}{showLabel && <span>{theme === "light" ? "Dark theme" : "Light theme"}</span>}</button>;
+}
+
 function Ring({ value, label, size = "large" }: { value: number; label: string; size?: "large" | "small" }) {
   return (
     <div className={`score-ring ${size}`} style={{ "--score": `${Math.min(100, Math.max(0, value)) * 3.6}deg` } as React.CSSProperties}>
@@ -249,7 +262,7 @@ function Ring({ value, label, size = "large" }: { value: number; label: string; 
   );
 }
 
-function Landing({ onStart, onDemo, onExploreBank }: { onStart: () => void; onDemo: () => void; onExploreBank: () => void }) {
+function Landing({ onStart, onDemo, onExploreBank, theme, onToggleTheme }: { onStart: () => void; onDemo: () => void; onExploreBank: () => void; theme: Theme; onToggleTheme: () => void }) {
   const { questions } = useQuestionBank();
   const featuredQuestions = subjects.map((subject) => questions.find((question) => question.subject === subject)).filter(Boolean) as Question[];
   return (
@@ -258,31 +271,32 @@ function Landing({ onStart, onDemo, onExploreBank }: { onStart: () => void; onDe
       <header className="landing-nav container">
         <Brand />
         <div className="landing-actions">
-          <button className="text-link desktop-only" onClick={onExploreBank}>Question bank</button>
-          <a className="text-link desktop-only" href="#exam-dates">2026 exam windows</a>
-          <button className="button button-secondary" onClick={onDemo}>View demo</button>
-          <button className="button button-primary" onClick={onStart}>Start free</button>
+          <a className="text-link desktop-only" href="#how-it-works">How it works</a>
+          <a className="text-link desktop-only" href="#exam-dates">Choose your exam</a>
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <button className="button button-secondary desktop-only" onClick={onDemo}>Try demo</button>
+          <button className="button button-primary" onClick={onStart}>Sign in</button>
         </div>
       </header>
 
       <section className="hero container">
         <div className="hero-copy">
-          <div className="eyebrow"><Sparkles size={15} /> Serious preparation should not need a serious fee</div>
-          <h1>Your SSC preparation. <span>Reimagined.</span></h1>
-          <p>A focused home for CGL and CHSL—with a bilingual question bank, adaptive practice, timed mocks and a plan that learns with you.</p>
+          <div className="eyebrow"><Target size={15} /> For SSC CGL &amp; CHSL students</div>
+          <h1>Know what to study <span>today.</span></h1>
+          <p>Choose your exam, start a short practice session, and see exactly what to revise next—in English, Hindi, or both.</p>
           <div className="hero-actions">
-            <button className="button button-primary button-large" onClick={onStart}>Start preparing free <ArrowRight size={18} /></button>
-            <button className="button button-quiet button-large" onClick={onExploreBank}>Explore {QUESTION_BANK_SIZE} questions <ChevronRight size={18} /></button>
+            <button className="button button-primary button-large" onClick={onStart}>Start today&apos;s practice <ArrowRight size={18} /></button>
+            <button className="button button-quiet button-large" onClick={onDemo}>See a student demo <ChevronRight size={18} /></button>
           </div>
           <div className="trust-row">
-            <span><Check size={16} /> Secure cloud account</span>
-            <span><Check size={16} /> No card or phone number</span>
+            <span><Check size={16} /> Pick CGL or CHSL</span>
             <span><Check size={16} /> Hindi + English</span>
+            <span><Check size={16} /> Full mocks with negative marking</span>
           </div>
         </div>
 
         <div className="hero-product" aria-label="ExamSaathi product preview">
-          <div className="preview-top"><span className="preview-dot" /><span>ExamSaathi learning space</span><span className="preview-chip">SSC CGL</span></div>
+          <div className="preview-top"><span className="preview-dot" /><span>Your study plan for today</span><span className="preview-chip">SSC CGL</span></div>
           <div className="landing-product-grid">
             <div className="product-rail" aria-hidden="true">
               <span className="active"><LayoutDashboard size={16} /> Today</span>
@@ -292,12 +306,12 @@ function Landing({ onStart, onDemo, onExploreBank }: { onStart: () => void; onDe
             </div>
             <div className="product-canvas">
               <div className="preview-focus">
-                <div><small>Today · 25 minute plan</small><h2>Build confidence in percentages.</h2><p>12 adaptive questions · 1 mistake revision</p></div>
+                <div><small>Your next step · about 25 minutes</small><h2>Practise percentages, then revise one mistake.</h2><p>Open the session, answer at your pace, and learn from each explanation.</p></div>
                 <Ring value={72} label="ready" size="small" />
               </div>
               <div className="product-bank-preview">
-                <div><span className="overline">From the question bank</span><strong>If a number increases from 80 to 100, what is the percentage increase?</strong><small>Quant · Percentages · Bilingual</small></div>
-                <span className="question-count"><b>{QUESTION_BANK_SIZE}</b><small>explained questions</small></span>
+                <div><span className="overline">Try a real question</span><strong>If a number increases from 80 to 100, what is the percentage increase?</strong><small>Quant · Percentages · Answer explained in both languages</small></div>
+                <button className="button button-secondary" onClick={onExploreBank}>Open question <ArrowRight size={16} /></button>
               </div>
             </div>
           </div>
@@ -306,18 +320,31 @@ function Landing({ onStart, onDemo, onExploreBank }: { onStart: () => void; onDe
 
       <section className="proof-strip">
         <div className="container proof-grid">
-          <div><strong>2</strong><span>focused exams</span></div>
-          <div><strong>{QUESTION_BANK_SIZE}</strong><span>bilingual questions</span></div>
-          <div><strong>4</strong><span>complete subjects</span></div>
-          <div><strong>₹0</strong><span>in the preview</span></div>
+          <div><strong>Choose</strong><span>CGL or CHSL</span></div>
+          <div><strong>Practise</strong><span>one clear session</span></div>
+          <div><strong>Review</strong><span>answers and mistakes</span></div>
+          <div><strong>Improve</strong><span>with a daily plan</span></div>
+        </div>
+      </section>
+
+      <section className="container section student-path" id="how-it-works">
+        <div className="section-heading centered">
+          <span className="eyebrow neutral"><Sparkles size={15} /> What do I do after signing in?</span>
+          <h2>Three simple steps. No confusion.</h2>
+          <p>The dashboard always shows one useful next action, so you can begin without making a complicated study plan first.</p>
+        </div>
+        <div className="student-step-grid">
+          <article><span>1</span><Target size={25} /><h3>Choose your exam</h3><p>Pick CGL or CHSL, your preferred language, and how much time you have today.</p></article>
+          <article><span>2</span><BookOpenCheck size={25} /><h3>Start today&apos;s practice</h3><p>Answer a short set selected around the topics that need your attention.</p></article>
+          <article><span>3</span><RotateCcw size={25} /><h3>Revise what went wrong</h3><p>Read the explanation, save the mistake, and get it again at the right time.</p></article>
         </div>
       </section>
 
       <section className="container section bank-story" id="question-bank">
         <div className="section-heading centered">
-          <span className="eyebrow neutral"><LibraryBig size={15} /> A question bank you can actually explore</span>
-          <h2>{QUESTION_BANK_SIZE} questions. Every one explained.</h2>
-          <p>Search by topic, filter by subject and difficulty, or open one question and learn the pattern immediately—in English, Hindi or both.</p>
+          <span className="eyebrow neutral"><LibraryBig size={15} /> Learn by doing</span>
+          <h2>Open a question. Learn the method.</h2>
+          <p>Search by topic or subject, try the answer yourself, then read a clear explanation in English, Hindi, or both.</p>
         </div>
         <div className="landing-question-grid">
           {featuredQuestions.slice(0, 3).map((question, index) => (
@@ -334,9 +361,9 @@ function Landing({ onStart, onDemo, onExploreBank }: { onStart: () => void; onDe
 
       <section className="container section" id="exam-dates">
         <div className="section-heading">
-          <span className="eyebrow neutral"><CalendarDays size={15} /> Your target, grounded in the SSC schedule</span>
-          <h2>Plan around the exam window. Adjust anytime.</h2>
-          <p>The planner uses official tentative windows and always lets the learner choose a personal target date.</p>
+          <span className="eyebrow neutral"><CalendarDays size={15} /> First, choose your exam</span>
+          <h2>Preparing for CGL or CHSL?</h2>
+          <p>Select the exam after signing in. ExamSaathi will use your own target date to organise daily practice and revision.</p>
         </div>
         <div className="exam-grid">
           {(Object.keys(examInfo) as Exam[]).map((exam) => (
@@ -354,17 +381,17 @@ function Landing({ onStart, onDemo, onExploreBank }: { onStart: () => void; onDe
       <section className="container section">
         <div className="bento-grid">
           <article className="bento bento-large bento-dark">
-            <div className="feature-icon"><Brain size={23} /></div><span className="overline">Adaptive engine</span><h2>Practice that meets you at your level.</h2><p>It begins gently, watches accuracy by subject, and raises difficulty only when you are ready.</p><div className="adaptive-path"><span>Easy</span><i /><span>Average</span><i /><span>Hard</span></div>
+            <div className="feature-icon"><Timer size={23} /></div><span className="overline">Real exam practice</span><h2>Take full mocks with SSC negative marking.</h2><p>Use a timed test when you are ready, then review correct, wrong, and unanswered questions.</p><div className="adaptive-path"><span>Practise</span><i /><span>Mock</span><i /><span>Review</span></div>
           </article>
-          <article className="bento"><div className="feature-icon warm"><Languages size={23} /></div><h3>Think in your language</h3><p>Switch between English, Hindi, or bilingual questions without losing your place.</p></article>
-          <article className="bento"><div className="feature-icon green"><WifiOff size={23} /></div><h3>Built for real conditions</h3><p>Fast, lightweight screens designed for affordable phones and everyday internet.</p></article>
-          <article className="bento bento-wide"><div><span className="overline">One honest score</span><h3>Know what to study next—not just what went wrong.</h3><p>Readiness combines accuracy, consistency, topic coverage and recent practice.</p></div><Ring value={78} label="ready" /></article>
+          <article className="bento"><div className="feature-icon warm"><Languages size={23} /></div><h3>Use your language</h3><p>Switch between English, Hindi, or bilingual questions without losing your place.</p></article>
+          <article className="bento"><div className="feature-icon green"><CalendarDays size={23} /></div><h3>Study toward your date</h3><p>Set a personal target date and get weekly milestones plus spaced revision.</p></article>
+          <article className="bento bento-wide"><div><span className="overline">Clear progress</span><h3>See your next weak topic, not a wall of charts.</h3><p>Your dashboard turns attempts, mistakes, and revision dates into one practical next step.</p></div><Ring value={78} label="ready" /></article>
         </div>
       </section>
 
       <section className="final-cta container">
-        <div><span className="eyebrow neutral">A fair shot starts here</span><h2>One strong study system. Zero coaching pressure.</h2></div>
-        <button className="button button-light button-large" onClick={onStart}>Create my free plan <ArrowRight size={18} /></button>
+        <div><span className="eyebrow neutral">Ready for today&apos;s first step?</span><h2>Choose your exam and start practising.</h2></div>
+        <button className="button button-light button-large" onClick={onStart}>Start today&apos;s practice <ArrowRight size={18} /></button>
       </section>
       <footer className="landing-footer container"><Brand /><span>Practice honestly. Improve daily.</span><span>Independent learning beta · Not affiliated with SSC</span></footer>
     </main>
@@ -373,19 +400,38 @@ function Landing({ onStart, onDemo, onExploreBank }: { onStart: () => void; onDe
 
 function AuthDialog({ onClose }: { onClose: () => void }) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [method, setMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
+  function cloudClient() {
     const supabase = getSupabase();
     if (!supabase) {
       setStatus("Cloud login is waiting for the ExamSaathi Supabase project connection.");
-      return;
+      return null;
     }
+    return supabase;
+  }
+
+  async function signInWithGoogle() {
+    const supabase = cloudClient();
+    if (!supabase) return;
+    setBusy(true);
+    setStatus("");
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin, queryParams: { prompt: "select_account" } } });
+    if (error) { setStatus(error.message); setBusy(false); }
+  }
+
+  async function submitEmail(event: FormEvent) {
+    event.preventDefault();
+    const supabase = cloudClient();
+    if (!supabase) return;
     setBusy(true);
     setStatus("");
     const result = mode === "signin"
@@ -397,7 +443,66 @@ function AuthDialog({ onClose }: { onClose: () => void }) {
     else onClose();
   }
 
-  return <div className="dialog-backdrop"><section className="setup-dialog auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title"><button className="icon-button dialog-close" onClick={onClose} aria-label="Close"><X size={20} /></button><div className="setup-copy"><span className="eyebrow neutral"><ShieldCheck size={14} /> Supabase secured</span><h2 id="auth-title">{mode === "signin" ? "Welcome back." : "Create your learning account."}</h2><p>Your progress, revisions, mock scores and plan sync securely across devices.</p></div><div className="segmented auth-tabs"><button type="button" className={mode === "signin" ? "active" : ""} onClick={() => setMode("signin")}>Sign in</button><button type="button" className={mode === "signup" ? "active" : ""} onClick={() => setMode("signup")}>Create account</button></div><form onSubmit={submit}>{mode === "signup" && <label className="field"><span>Name</span><input value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></label>}<label className="field"><span>Email</span><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required /></label><label className="field"><span>Password</span><input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} minLength={8} required /></label>{status && <p className="auth-status" role="status">{status}</p>}<button className="button button-primary button-large full" disabled={busy}>{busy ? "Connecting…" : mode === "signin" ? "Sign in securely" : "Create free account"}</button></form></section></div>;
+  function normalizedPhone() {
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length === 10) return `+91${digits}`;
+    return `+${digits}`;
+  }
+
+  async function sendPhoneOtp(event: FormEvent) {
+    event.preventDefault();
+    const supabase = cloudClient();
+    if (!supabase) return;
+    const mobile = normalizedPhone();
+    if (mobile.length < 12) return setStatus("Enter a valid mobile number with country code.");
+    setBusy(true);
+    setStatus("");
+    const { error } = await supabase.auth.signInWithOtp({ phone: mobile });
+    setBusy(false);
+    if (error) setStatus(error.message);
+    else { setOtpSent(true); setStatus(`OTP sent to ${mobile}. Enter the 6-digit code below.`); }
+  }
+
+  async function verifyPhoneOtp(event: FormEvent) {
+    event.preventDefault();
+    const supabase = cloudClient();
+    if (!supabase) return;
+    if (!/^\d{6}$/.test(otp.trim())) return setStatus("Enter the 6-digit OTP sent to your mobile.");
+    setBusy(true);
+    setStatus("");
+    const { error } = await supabase.auth.verifyOtp({ phone: normalizedPhone(), token: otp.trim(), type: "sms" });
+    setBusy(false);
+    if (error) setStatus(error.message); else onClose();
+  }
+
+  return (
+    <div className="dialog-backdrop">
+      <section className="setup-dialog auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+        <button className="icon-button dialog-close" onClick={onClose} aria-label="Close"><X size={20} /></button>
+        <div className="setup-copy"><span className="eyebrow neutral"><ShieldCheck size={14} /> Secure cloud account</span><h2 id="auth-title">Sign in and continue studying.</h2><p>Use Google, mobile OTP, or email. Your plan and progress stay available on every device.</p></div>
+
+        <button className="button auth-provider full" type="button" onClick={signInWithGoogle} disabled={busy}><GoogleMark /> Continue with Google</button>
+        <div className="auth-divider"><span>or use</span></div>
+
+        <div className="segmented auth-method-tabs" aria-label="Sign-in method">
+          <button type="button" className={method === "email" ? "active" : ""} onClick={() => { setMethod("email"); setStatus(""); }}><Mail size={16} /> Email</button>
+          <button type="button" className={method === "phone" ? "active" : ""} onClick={() => { setMethod("phone"); setStatus(""); }}><Phone size={16} /> Mobile OTP</button>
+        </div>
+
+        {method === "email" ? <>
+          <div className="segmented auth-tabs"><button type="button" className={mode === "signin" ? "active" : ""} onClick={() => setMode("signin")}>Sign in</button><button type="button" className={mode === "signup" ? "active" : ""} onClick={() => setMode("signup")}>Create account</button></div>
+          <form onSubmit={submitEmail}>{mode === "signup" && <label className="field"><span>Name</span><input value={name} onChange={(event) => setName(event.target.value)} autoComplete="name" required /></label>}<label className="field"><span>Email</span><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required /></label><label className="field"><span>Password</span><input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "signin" ? "current-password" : "new-password"} minLength={8} required /></label>{status && <p className="auth-status" role="status" aria-live="polite">{status}</p>}<button className="button button-primary button-large full" disabled={busy}>{busy ? "Connecting…" : mode === "signin" ? "Sign in with email" : "Create free account"}</button></form>
+        </> : <form onSubmit={otpSent ? verifyPhoneOtp : sendPhoneOtp}>
+          <label className="field"><span>Mobile number</span><input type="tel" inputMode="tel" value={phone} onChange={(event) => { setPhone(event.target.value); setOtpSent(false); setOtp(""); }} placeholder="+91 98765 43210" autoComplete="tel" required /><small>For Indian numbers, you can enter the 10-digit number directly.</small></label>
+          {otpSent && <label className="field"><span>6-digit OTP</span><input type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))} autoComplete="one-time-code" required /></label>}
+          {status && <p className="auth-status" role="status" aria-live="polite">{status}</p>}
+          <button className="button button-primary button-large full" disabled={busy}>{busy ? "Please wait…" : otpSent ? "Verify OTP and sign in" : "Send mobile OTP"}</button>
+          {otpSent && <button className="text-button auth-resend" type="button" onClick={() => { setOtpSent(false); setOtp(""); setStatus(""); }}>Change number or resend</button>}
+        </form>}
+        <p className="privacy-line"><ShieldCheck size={14} /> Login is handled securely by Supabase.</p>
+      </section>
+    </div>
+  );
 }
 
 function AppNav({ view, setView, open, onClose, isAdmin }: { view: View; setView: (view: View) => void; open: boolean; onClose: () => void; isAdmin: boolean }) {
@@ -417,13 +522,14 @@ function AppNav({ view, setView, open, onClose, isAdmin }: { view: View; setView
   );
 }
 
-function Topbar({ profile, onMenu, onSettings }: { profile: Profile; onMenu: () => void; onSettings: () => void }) {
+function Topbar({ profile, onMenu, onSettings, theme, onToggleTheme }: { profile: Profile; onMenu: () => void; onSettings: () => void; theme: Theme; onToggleTheme: () => void }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   return (
     <header className="topbar">
       <button className="icon-button mobile-only" aria-label="Open menu" onClick={onMenu}><Menu size={21} /></button>
       <div className="topbar-status"><span className="status-dot" /><span>{profile.exam} · {profile.language}</span></div>
       <div className="topbar-actions">
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         <div className="notification-wrap">
           <button className="icon-button" aria-label="Notifications" aria-expanded={notificationsOpen} onClick={() => setNotificationsOpen((value) => !value)}><Bell size={19} /></button>
           {notificationsOpen && <div className="notification-popover" role="status"><span className="feature-icon"><CalendarDays size={19} /></span><div><b>Keep your target flexible</b><p>{examInfo[profile.exam].officialWindow}. Verify exact dates on SSC before travel or booking decisions.</p><a href="https://ssc.gov.in/" target="_blank" rel="noreferrer">Open SSC website <ExternalLink size={13} /></a></div></div>}
@@ -511,8 +617,7 @@ function Dashboard({ profile, progress, onStartPractice, onStartMock, onViewProg
 
       <button className="bank-spotlight" onClick={onOpenBank}>
         <span className="bank-spotlight-icon"><LibraryBig size={25} /></span>
-        <span className="bank-spotlight-copy"><small>Complete practice library</small><b>Browse all {QUESTION_BANK_SIZE} questions</b><em>Search topics, choose difficulty and open any explained question.</em></span>
-        <span className="bank-spotlight-stats"><b>4</b><small>subjects</small></span>
+        <span className="bank-spotlight-copy"><small>Complete practice library</small><b>Browse practice by topic</b><em>Search, choose a level, and open any explained question.</em></span>
         <span className="bank-spotlight-arrow"><ArrowRight size={20} /></span>
       </button>
 
@@ -532,7 +637,7 @@ function PracticeHub({ progress, onStart }: { progress: Progress; onStart: (mode
     <div className="view-shell">
       <div className="page-heading"><span className="page-kicker">Practice studio</span><h1>Choose how you want to improve.</h1><p>Every answer updates your topic health and the next adaptive question.</p></div>
       <section className="practice-feature">
-        <div><span className="eyebrow"><Sparkles size={15} /> Recommended</span><h2>Daily adaptive practice</h2><p>Starts around your current level, prioritises weaker subjects, and adjusts after every answer across a {QUESTION_BANK_SIZE}-question bilingual bank.</p><div className="mission-stats dark"><span><Clock3 size={16} /> ~20 min</span><span><ListChecks size={16} /> Mixed subjects</span></div><button className="button button-white button-large" onClick={() => onStart()}>Start adaptive set <ArrowRight size={18} /></button></div>
+        <div><span className="eyebrow"><Sparkles size={15} /> Recommended</span><h2>Daily adaptive practice</h2><p>Starts around your current level, prioritises weaker subjects, and adjusts after every answer in the bilingual practice bank.</p><div className="mission-stats dark"><span><Clock3 size={16} /> ~20 min</span><span><ListChecks size={16} /> Mixed subjects</span></div><button className="button button-white button-large" onClick={() => onStart()}>Start adaptive set <ArrowRight size={18} /></button></div>
         <Brain size={104} strokeWidth={1.25} aria-hidden="true" />
       </section>
       <h2 className="subsection-title">Subject drills</h2>
@@ -574,8 +679,8 @@ function QuestionBank({ profile, progress, onStart }: { profile: Profile; progre
   return (
     <div className="view-shell bank-view">
       <div className="bank-heading">
-        <div><span className="page-kicker">Practice library · {source === "cloud" ? "Cloud live" : "Verified offline fallback"}</span><h1>The complete question bank.</h1><p>{examQuestions.length} exam-relevant {profile.exam} questions from a {questions.length}-question bilingual master bank.</p></div>
-        <div className="bank-total"><span><LibraryBig size={22} /></span><strong>{examQuestions.length}</strong><small>available for {profile.exam}</small></div>
+        <div><span className="page-kicker">Practice library · {source === "cloud" ? "Cloud live" : "Verified offline fallback"}</span><h1>Find a topic and practise.</h1><p>Browse exam-relevant {profile.exam} questions in English, Hindi, or both. Every question includes a clear explanation.</p></div>
+        <div className="bank-total status-only"><span><LibraryBig size={22} /></span><strong>Ready</strong><small>for {profile.exam} practice</small></div>
       </div>
 
       <section className="bank-tools" aria-label="Question bank filters">
@@ -587,7 +692,7 @@ function QuestionBank({ profile, progress, onStart }: { profile: Profile; progre
         {(["All", ...subjects] as const).map((item) => <button key={item} aria-pressed={subject === item} className={subject === item ? "active" : ""} onClick={() => resetAnd(() => setSubject(item))}>{item === "All" ? "All subjects" : subjectMeta[item].short}</button>)}
       </div>
 
-      <div className="bank-results-line"><span><b>{filtered.length}</b> questions found</span><span>Answers stay hidden until you practise</span></div>
+      <div className="bank-results-line"><span><b>Matching practice</b></span><span>Answers stay hidden until you practise</span></div>
 
       {filtered.length ? <div className="question-bank-grid">
         {filtered.slice(0, visibleCount).map((question) => {
@@ -601,7 +706,7 @@ function QuestionBank({ profile, progress, onStart }: { profile: Profile; progre
         })}
       </div> : <section className="bank-empty"><Search size={28} /><h2>No matching questions yet.</h2><p>Try a broader keyword or reset the filters.</p><button className="button button-secondary" onClick={() => { setSearch(""); setSubject("All"); setDifficulty("All"); setVisibleCount(12); }}>Reset filters</button></section>}
 
-      {visibleCount < filtered.length && <button className="button button-secondary button-large bank-more" onClick={() => setVisibleCount((count) => count + 12)}>Show 12 more questions</button>}
+      {visibleCount < filtered.length && <button className="button button-secondary button-large bank-more" onClick={() => setVisibleCount((count) => count + 12)}>Show more questions</button>}
     </div>
   );
 }
@@ -888,18 +993,18 @@ function AdminView({ profile }: { profile: Profile }) {
   }
 
   if (profile.role !== "admin") return <div className="view-shell"><section className="empty-state"><ShieldCheck size={34} /><h2>Admin access required</h2><p>Question management is protected by a server-side role and database policies.</p></section></div>;
-  return <div className="view-shell admin-view"><div className="page-heading split"><div><span className="page-kicker">Admin question management</span><h1>Publish with an audit trail.</h1><p>Create, review, edit or archive questions. Every write is protected by RLS and logged.</p></div><div className="bank-total"><span><LibraryBig size={22} /></span><strong>{QUESTION_BANK_SIZE}+</strong><small>verified seed bank</small></div></div><div className="admin-layout"><form className="panel admin-form" onSubmit={save}><div className="panel-heading"><div><span className="overline">Editor</span><h2>{draft.id ? "Edit question" : "New question"}</h2></div>{draft.id && <button type="button" className="button button-quiet" onClick={() => setDraft(emptyAdminDraft)}><Plus size={16} /> New</button>}</div><label className="field"><span>English prompt</span><textarea value={draft.prompt_en} onChange={(event) => setDraft({ ...draft, prompt_en: event.target.value })} required /></label><label className="field"><span>Hindi prompt</span><textarea value={draft.prompt_hi} onChange={(event) => setDraft({ ...draft, prompt_hi: event.target.value })} /></label><div className="form-row"><label className="field"><span>Subject</span><select value={draft.subject} onChange={(event) => setDraft({ ...draft, subject: event.target.value as Subject })}>{subjects.map((subject) => <option key={subject}>{subject}</option>)}</select></label><label className="field"><span>Topic</span><input value={draft.topic} onChange={(event) => setDraft({ ...draft, topic: event.target.value })} required /></label></div><label className="field"><span>Four options (one per line)</span><textarea value={draft.options} onChange={(event) => setDraft({ ...draft, options: event.target.value })} required /></label><div className="form-row"><label className="field"><span>Correct option</span><select value={draft.answer} onChange={(event) => setDraft({ ...draft, answer: Number(event.target.value) })}><option value={0}>A</option><option value={1}>B</option><option value={2}>C</option><option value={3}>D</option></select></label><label className="field"><span>Difficulty</span><select value={draft.difficulty} onChange={(event) => setDraft({ ...draft, difficulty: Number(event.target.value) as 1 | 2 | 3 })}><option value={1}>Easy</option><option value={2}>Average</option><option value={3}>Hard</option></select></label><label className="field"><span>Status</span><select value={draft.status} onChange={(event) => setDraft({ ...draft, status: event.target.value as AdminDraft["status"] })}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label></div>{status && <p className="auth-status" role="status">{status}</p>}<button className="button button-primary"><ShieldCheck size={17} /> Save question</button></form><section className="panel admin-list"><div className="panel-heading"><div><span className="overline">Recent changes</span><h2>Cloud question bank</h2></div><button className="button button-secondary" onClick={refresh}>Refresh</button></div>{rows.map((row) => <button className="admin-row" key={String(row.id)} onClick={() => edit(row)}><span className={`subject-dot ${subjectMeta[row.subject as Subject].color}`} /><span><b>{String(row.prompt_en)}</b><small>{String(row.id)} · {String(row.status)} · {String(row.topic)}</small></span><Pencil size={16} /></button>)}</section></div></div>;
+  return <div className="view-shell admin-view"><div className="page-heading split"><div><span className="page-kicker">Admin question management</span><h1>Publish with an audit trail.</h1><p>Create, review, edit or archive questions. Every write is protected by RLS and logged.</p></div><div className="bank-total status-only"><span><LibraryBig size={22} /></span><strong>Verified</strong><small>cloud-managed bank</small></div></div><div className="admin-layout"><form className="panel admin-form" onSubmit={save}><div className="panel-heading"><div><span className="overline">Editor</span><h2>{draft.id ? "Edit question" : "New question"}</h2></div>{draft.id && <button type="button" className="button button-quiet" onClick={() => setDraft(emptyAdminDraft)}><Plus size={16} /> New</button>}</div><label className="field"><span>English prompt</span><textarea value={draft.prompt_en} onChange={(event) => setDraft({ ...draft, prompt_en: event.target.value })} required /></label><label className="field"><span>Hindi prompt</span><textarea value={draft.prompt_hi} onChange={(event) => setDraft({ ...draft, prompt_hi: event.target.value })} /></label><div className="form-row"><label className="field"><span>Subject</span><select value={draft.subject} onChange={(event) => setDraft({ ...draft, subject: event.target.value as Subject })}>{subjects.map((subject) => <option key={subject}>{subject}</option>)}</select></label><label className="field"><span>Topic</span><input value={draft.topic} onChange={(event) => setDraft({ ...draft, topic: event.target.value })} required /></label></div><label className="field"><span>Four options (one per line)</span><textarea value={draft.options} onChange={(event) => setDraft({ ...draft, options: event.target.value })} required /></label><div className="form-row"><label className="field"><span>Correct option</span><select value={draft.answer} onChange={(event) => setDraft({ ...draft, answer: Number(event.target.value) })}><option value={0}>A</option><option value={1}>B</option><option value={2}>C</option><option value={3}>D</option></select></label><label className="field"><span>Difficulty</span><select value={draft.difficulty} onChange={(event) => setDraft({ ...draft, difficulty: Number(event.target.value) as 1 | 2 | 3 })}><option value={1}>Easy</option><option value={2}>Average</option><option value={3}>Hard</option></select></label><label className="field"><span>Status</span><select value={draft.status} onChange={(event) => setDraft({ ...draft, status: event.target.value as AdminDraft["status"] })}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label></div>{status && <p className="auth-status" role="status">{status}</p>}<button className="button button-primary"><ShieldCheck size={17} /> Save question</button></form><section className="panel admin-list"><div className="panel-heading"><div><span className="overline">Recent changes</span><h2>Cloud question bank</h2></div><button className="button button-secondary" onClick={refresh}>Refresh</button></div>{rows.map((row) => <button className="admin-row" key={String(row.id)} onClick={() => edit(row)}><span className={`subject-dot ${subjectMeta[row.subject as Subject].color}`} /><span><b>{String(row.prompt_en)}</b><small>{String(row.id)} · {String(row.status)} · {String(row.topic)}</small></span><Pencil size={16} /></button>)}</section></div></div>;
 }
 
-function SettingsView({ profile, onSave, onReset, onLogout }: { profile: Profile; onSave: (profile: Profile) => void; onReset: () => void; onLogout: () => void }) {
+function SettingsView({ profile, onSave, onReset, onLogout, theme, onToggleTheme }: { profile: Profile; onSave: (profile: Profile) => void; onReset: () => void; onLogout: () => void; theme: Theme; onToggleTheme: () => void }) {
   const [draft, setDraft] = useState(profile);
   const [saved, setSaved] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"reset" | "logout" | null>(null);
   function submit(event: FormEvent) { event.preventDefault(); onSave(draft); setSaved(true); window.setTimeout(() => setSaved(false), 1800); }
-  return <div className="view-shell settings-view"><div className="page-heading"><span className="page-kicker">Preferences</span><h1>Your plan should fit your life.</h1><p>Change the exam, language, daily commitment or target whenever needed.</p></div><form className="panel settings-form" onSubmit={submit}><div className="settings-section"><div><span className="settings-icon"><UserRound size={20} /></span><h2>Learner profile</h2><p>Synced securely to your account across devices.</p></div><div className="settings-fields"><label className="field"><span>First name</span><input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoComplete="given-name" /></label><label className="field"><span>Question language</span><select value={draft.language} onChange={(e) => setDraft({ ...draft, language: e.target.value as Language })}><option>English</option><option>Hindi</option><option>Bilingual</option></select></label></div></div><div className="settings-divider" /><div className="settings-section"><div><span className="settings-icon"><Target size={20} /></span><h2>Exam goal</h2><p>Official windows remain tentative until SSC confirms exact dates.</p></div><div className="settings-fields"><label className="field"><span>Exam</span><select value={draft.exam} onChange={(e) => { const exam = e.target.value as Exam; setDraft({ ...draft, exam, targetDate: examInfo[exam].defaultTarget }); }}><option value="CGL">SSC CGL 2026</option><option value="CHSL">SSC CHSL 2026</option></select></label><label className="field"><span>Personal target date</span><input type="date" min={todayKey()} value={draft.targetDate} onChange={(e) => setDraft({ ...draft, targetDate: e.target.value })} /></label><label className="field"><span>Daily study time</span><select value={draft.dailyMinutes} onChange={(e) => setDraft({ ...draft, dailyMinutes: Number(e.target.value) })}><option value={15}>15 minutes</option><option value={25}>25 minutes</option><option value={45}>45 minutes</option><option value={60}>60 minutes</option></select></label></div></div><div className="form-footer"><span role="status" aria-live="polite">{saved && <><CheckCircle2 size={16} /> Changes saved to cloud</>}</span><button className="button button-primary" type="submit">Save changes</button></div></form><section className="panel data-panel"><div><span className="settings-icon"><ShieldCheck size={20} /></span><h2>Cloud account</h2><p>Learning history, revisions, mock scores and your target plan are protected by row-level access policies.</p></div><div><button className="button button-secondary" onClick={() => setConfirmAction("reset")}><RotateCcw size={17} /> Reset this view</button><button className="button button-quiet danger-text" onClick={() => setConfirmAction("logout")}><LogOut size={17} /> Sign out</button></div></section>{confirmAction === "reset" && <ConfirmAction title="Reset this progress view?" description="This clears the current in-memory summary. Your secured cloud history remains available after the next sign in." confirmLabel="Reset view" onCancel={() => setConfirmAction(null)} onConfirm={() => { onReset(); setConfirmAction(null); }} />}{confirmAction === "logout" && <ConfirmAction title="Sign out of ExamSaathi?" description="Your cloud progress stays safe and will return when you sign in again." confirmLabel="Sign out" onCancel={() => setConfirmAction(null)} onConfirm={onLogout} />}</div>;
+  return <div className="view-shell settings-view"><div className="page-heading"><span className="page-kicker">Preferences</span><h1>Your plan should fit your life.</h1><p>Change the exam, language, daily commitment or target whenever needed.</p></div><section className="panel appearance-panel"><div><span className="settings-icon">{theme === "light" ? <Moon size={20} /> : <Sun size={20} />}</span><h2>Appearance</h2><p>Use the theme that feels comfortable for your study space.</p></div><ThemeToggle theme={theme} onToggle={onToggleTheme} showLabel /></section><form className="panel settings-form" onSubmit={submit}><div className="settings-section"><div><span className="settings-icon"><UserRound size={20} /></span><h2>Learner profile</h2><p>Synced securely to your account across devices.</p></div><div className="settings-fields"><label className="field"><span>First name</span><input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} autoComplete="given-name" /></label><label className="field"><span>Question language</span><select value={draft.language} onChange={(e) => setDraft({ ...draft, language: e.target.value as Language })}><option>English</option><option>Hindi</option><option>Bilingual</option></select></label></div></div><div className="settings-divider" /><div className="settings-section"><div><span className="settings-icon"><Target size={20} /></span><h2>Exam goal</h2><p>Official windows remain tentative until SSC confirms exact dates.</p></div><div className="settings-fields"><label className="field"><span>Exam</span><select value={draft.exam} onChange={(e) => { const exam = e.target.value as Exam; setDraft({ ...draft, exam, targetDate: examInfo[exam].defaultTarget }); }}><option value="CGL">SSC CGL 2026</option><option value="CHSL">SSC CHSL 2026</option></select></label><label className="field"><span>Personal target date</span><input type="date" min={todayKey()} value={draft.targetDate} onChange={(e) => setDraft({ ...draft, targetDate: e.target.value })} /></label><label className="field"><span>Daily study time</span><select value={draft.dailyMinutes} onChange={(e) => setDraft({ ...draft, dailyMinutes: Number(e.target.value) })}><option value={15}>15 minutes</option><option value={25}>25 minutes</option><option value={45}>45 minutes</option><option value={60}>60 minutes</option></select></label></div></div><div className="form-footer"><span role="status" aria-live="polite">{saved && <><CheckCircle2 size={16} /> Changes saved to cloud</>}</span><button className="button button-primary" type="submit">Save changes</button></div></form><section className="panel data-panel"><div><span className="settings-icon"><ShieldCheck size={20} /></span><h2>Cloud account</h2><p>Learning history, revisions, mock scores and your target plan are protected by row-level access policies.</p></div><div><button className="button button-secondary" onClick={() => setConfirmAction("reset")}><RotateCcw size={17} /> Reset this view</button><button className="button button-quiet danger-text" onClick={() => setConfirmAction("logout")}><LogOut size={17} /> Sign out</button></div></section>{confirmAction === "reset" && <ConfirmAction title="Reset this progress view?" description="This clears the current in-memory summary. Your secured cloud history remains available after the next sign in." confirmLabel="Reset view" onCancel={() => setConfirmAction(null)} onConfirm={() => { onReset(); setConfirmAction(null); }} />}{confirmAction === "logout" && <ConfirmAction title="Sign out of ExamSaathi?" description="Your cloud progress stays safe and will return when you sign in again." confirmLabel="Sign out" onCancel={() => setConfirmAction(null)} onConfirm={onLogout} />}</div>;
 }
 
-function ExamSaathiExperience() {
+function ExamSaathiExperience({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
   const { questions } = useQuestionBank();
   const questionBankRef = useRef(questions);
   const [ready, setReady] = useState(false);
@@ -917,6 +1022,8 @@ function ExamSaathiExperience() {
   const [activeMockId, setActiveMockId] = useState(MOCKS[0].id);
   const [mockResult, setMockResult] = useState<{ marks: number; correct: number; wrong: number; unanswered: number } | null>(null);
   const [cloudStatus, setCloudStatus] = useState("");
+  const appMainRef = useRef<HTMLDivElement>(null);
+  const mainContentRef = useRef<HTMLElement>(null);
 
   useEffect(() => { questionBankRef.current = questions; }, [questions]);
 
@@ -959,6 +1066,12 @@ function ExamSaathiExperience() {
   }, []);
 
   const appTitle = useMemo(() => navItems.find((item) => item.id === view)?.label || "ExamSaathi", [view]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    appMainRef.current?.scrollTo(0, 0);
+    if (profile && !inPractice && !inMock && !mockResult) requestAnimationFrame(() => mainContentRef.current?.focus({ preventScroll: true }));
+  }, [view, profile, inPractice, inMock, mockResult]);
 
   async function saveProfile(next: Profile) {
     setProfile(next);
@@ -1052,7 +1165,7 @@ function ExamSaathiExperience() {
 
   if (!ready) return <main className="loading-screen"><span className="loading-mark"><Target size={23} /></span><p>Preparing your study space…</p></main>;
 
-  if (!profile) return <><Landing onStart={() => setSetupOpen(true)} onDemo={openDemo} onExploreBank={openBankDemo} />{setupOpen && <AuthDialog onClose={() => setSetupOpen(false)} />}</>;
+  if (!profile) return <><Landing onStart={() => setSetupOpen(true)} onDemo={openDemo} onExploreBank={openBankDemo} theme={theme} onToggleTheme={onToggleTheme} />{setupOpen && <AuthDialog onClose={() => setSetupOpen(false)} />}</>;
 
   if (inPractice) return <QuestionSession profile={profile} progress={progress} initialMode={practiceMode} onAnswer={recordAnswer} onBookmark={(questionId) => setProgress((current) => ({ ...current, bookmarks: current.bookmarks.includes(questionId) ? current.bookmarks.filter((id) => id !== questionId) : [...current.bookmarks, questionId] }))} onExit={() => setInPractice(false)} />;
   if (inMock) return <MockSession profile={profile} mockId={activeMockId} onFinish={finishMock} onExit={() => setInMock(false)} />;
@@ -1064,9 +1177,9 @@ function ExamSaathiExperience() {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <AppNav view={view} setView={setView} open={menuOpen} onClose={() => setMenuOpen(false)} isAdmin={profile.role === "admin"} />
       {menuOpen && <button className="sidebar-scrim" onClick={() => setMenuOpen(false)} aria-label="Close menu" />}
-      <div className="app-main">
-        <Topbar profile={profile} onMenu={() => setMenuOpen(true)} onSettings={() => setView("settings")} />
-        <main id="main-content" aria-label={appTitle}>
+      <div className="app-main" ref={appMainRef}>
+        <Topbar profile={profile} onMenu={() => setMenuOpen(true)} onSettings={() => setView("settings")} theme={theme} onToggleTheme={onToggleTheme} />
+        <main id="main-content" aria-label={appTitle} tabIndex={-1} ref={mainContentRef}>
           {cloudStatus && <div className={`cloud-status ${cloudStatus === "Cloud synced" ? "online" : ""}`}><span />{cloudStatus}</div>}
           {view === "dashboard" && <Dashboard profile={profile} progress={progress} onStartPractice={startPractice} onStartMock={() => beginMock(MOCKS[0].id)} onViewProgress={() => setView("progress")} onOpenBank={() => setView("bank")} onOpenPlanner={() => setView("planner")} onOpenChallenge={() => setView("challenge")} />}
           {view === "bank" && <QuestionBank profile={profile} progress={progress} onStart={startPractice} />}
@@ -1077,7 +1190,7 @@ function ExamSaathiExperience() {
           {view === "progress" && <ProgressView progress={progress} onPractice={startPractice} />}
           {view === "mistakes" && <MistakesView profile={profile} progress={progress} onPractice={() => startPractice("mistakes")} onClear={() => setProgress({ ...progress, mistakes: [] })} />}
           {view === "admin" && <AdminView profile={profile} />}
-          {view === "settings" && <SettingsView profile={profile} onSave={(next) => void saveProfile(next)} onReset={() => setProgress(emptyProgress)} onLogout={logout} />}
+          {view === "settings" && <SettingsView profile={profile} onSave={(next) => void saveProfile(next)} onReset={() => setProgress(emptyProgress)} onLogout={logout} theme={theme} onToggleTheme={onToggleTheme} />}
         </main>
       </div>
       <MobileNav view={view} setView={setView} />
@@ -1088,6 +1201,7 @@ function ExamSaathiExperience() {
 export default function ExamSaathiApp() {
   const [questionBank, setQuestionBank] = useState<Question[]>(seedQuestions);
   const [source, setSource] = useState<"cloud" | "verified-fallback">("verified-fallback");
+  const [theme, setTheme] = useState<Theme>("light");
   const refreshQuestions = useCallback(async () => {
     const cloudQuestions = await fetchPublishedQuestions();
     if (cloudQuestions.length >= 1500) {
@@ -1107,6 +1221,19 @@ export default function ExamSaathiApp() {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    const stored = window.localStorage.getItem("examsaathi-theme");
+    const preferred: Theme = stored === "dark" || stored === "light" ? stored : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    queueMicrotask(() => setTheme(preferred));
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    window.localStorage.setItem("examsaathi-theme", theme);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#0e0e12" : "#f5f5f7");
+  }, [theme]);
+
   const value = useMemo(() => ({ questions: questionBank, refreshQuestions, source }), [questionBank, refreshQuestions, source]);
-  return <QuestionBankContext.Provider value={value}><ExamSaathiExperience /></QuestionBankContext.Provider>;
+  return <QuestionBankContext.Provider value={value}><ExamSaathiExperience theme={theme} onToggleTheme={() => setTheme((current) => current === "light" ? "dark" : "light")} /></QuestionBankContext.Provider>;
 }

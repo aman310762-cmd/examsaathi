@@ -3,19 +3,19 @@ import type { Metadata, Viewport } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL("https://examsaathi-eight.vercel.app"),
   title: { default: "ExamSaathi", template: "%s · ExamSaathi" },
-  description: "Smart, affordable SSC CGL and CHSL preparation for every Indian student.",
+  description: "Clear daily SSC CGL and CHSL practice in English and Hindi, with mistake revision, study planning, and full mock tests.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
   openGraph: {
     type: "website",
-    title: "ExamSaathi — Smart SSC CGL & CHSL Practice",
-    description: "Adaptive bilingual practice, daily goals, mock tests and progress tracking for SSC CGL and CHSL.",
+    title: "ExamSaathi — Clear Daily SSC Practice",
+    description: "Choose your exam, practise today, revise mistakes, and take full mocks in English or Hindi.",
     images: [{ url: "/og.png", width: 1730, height: 909, alt: "ExamSaathi SSC preparation dashboard and bilingual question bank" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ExamSaathi — Smart SSC CGL & CHSL Practice",
-    description: "Practice smarter. Progress daily.",
+    title: "ExamSaathi — Clear Daily SSC Practice",
+    description: "Know what to study today, then get it done.",
     images: ["/og.png"],
   },
 };
