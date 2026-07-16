@@ -52,6 +52,8 @@ import {
 import { createContext, FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { examInfo, Exam, Language, QUESTION_BANK_SIZE, Question, questions as seedQuestions, Subject, subjects } from "./questions";
 import { chooseAdaptiveQuestion, seededQuestions } from "../lib/adaptive";
+import { buildTeachingNote } from "../lib/teaching-note";
+import { TeachingNotePanel } from "./TeachingNotePanel";
 import {
   CloudProfile,
   getSupabase,
@@ -640,6 +642,7 @@ function QuestionSession({ profile, progress, initialMode, onAnswer, onBookmark,
 
   const subjectColor = subjectMeta[current.subject].color;
   const sessionLabel = typeof initialMode === "object" ? "Question bank" : initialMode === "mistakes" ? "Mistake revision" : initialMode || "Adaptive practice";
+  const teachingNote = revealed && selected !== null && selected !== current.answer ? buildTeachingNote(current, selected) : null;
   return (
     <div className="question-shell"><ImmersiveBackdrop />
       <header className="question-topbar"><button className="button button-quiet" onClick={onExit}><X size={18} /> Exit</button><div className="question-session-title"><span className={`subject-dot ${subjectColor}`} /> <b>{sessionLabel}</b><small>{sessionAnswered} answered · {sessionCorrect} correct</small></div><div className="segmented compact"><button className={language === "English" ? "active" : ""} onClick={() => setLanguage("English")}>EN</button><button className={language === "Hindi" ? "active" : ""} onClick={() => setLanguage("Hindi")}>हि</button><button className={language === "Bilingual" ? "active" : ""} onClick={() => setLanguage("Bilingual")}>दोनों</button></div></header>
@@ -656,7 +659,8 @@ function QuestionSession({ profile, progress, initialMode, onAnswer, onBookmark,
               return <button key={`${current.id}-${index}`} aria-pressed={selected === index} className={`option ${state}`} disabled={revealed} onClick={() => choose(index)}><span className="option-letter">{String.fromCharCode(65 + index)}</span><span>{localText(option, language)}{language === "Bilingual" && option.hi !== option.en && <small>{option.hi}</small>}</span>{revealed && index === current.answer && <CheckCircle2 size={20} />}{revealed && index === selected && index !== current.answer && <XCircle size={20} />}</button>;
             })}
           </div>
-          {revealed && <div className={`explanation ${selected === current.answer ? "success" : "review"}`}><div className="explanation-title">{selected === current.answer ? <CheckCircle2 size={20} /> : <Lightbulb size={20} />}<b>{selected === current.answer ? "Correct. Well done." : "Learn this pattern."}</b></div><p>{localText(current.explanation, language)}</p>{language === "Bilingual" && <p className="hindi-copy small">{current.explanation.hi}</p>}</div>}
+          {revealed && selected === current.answer && <div className="explanation success"><div className="explanation-title"><CheckCircle2 size={20} /><b>Correct. Well done.</b></div><p>{localText(current.explanation, language)}</p>{language === "Bilingual" && <p className="hindi-copy small">{current.explanation.hi}</p>}</div>}
+          {teachingNote && <TeachingNotePanel note={teachingNote} language={language} />}
           <div className="question-actions"><div><button className="icon-text-button" aria-label="Bookmark question" onClick={() => onBookmark(current.id)}><Bookmark size={17} fill={progress.bookmarks.includes(current.id) ? "currentColor" : "none"} /> {progress.bookmarks.includes(current.id) ? "Saved" : "Save"}</button><button className="icon-text-button" aria-label="Report question" disabled={reported} onClick={() => setReported(true)}><Flag size={17} /> {reported ? "Thanks" : "Report"}</button></div>{revealed ? <button className="button button-primary" onClick={next}>Next question <ArrowRight size={17} /></button> : <span className="answer-hint">Choose one answer to continue</span>}</div>
         </div>
         <aside className="session-side"><span className="overline">How adaptive works</span><h3>Your level changes with you.</h3><p>Recent accuracy and weak subjects shape the next question. No pressure, only useful difficulty.</p><div className="level-track"><span className="done"><Check size={14} /> Easy</span><i /><span className="active">Average</span><i /><span>Hard</span></div><div className="session-tip"><Lightbulb size={18} /><span><b>Accuracy first</b><small>Speed becomes useful after the method is clear.</small></span></div></aside>

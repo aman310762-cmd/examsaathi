@@ -22,6 +22,7 @@ Learner profiles, attempts, revision schedules, mock results and challenge score
 - Adaptive Engine v2 with recency, weakness, difficulty and spaced-review signals
 - five live 60-minute, 100-question mocks with +2/−0.5 marking
 - explanations, bookmarks and question reporting feedback
+- detailed wrong-answer mini-lessons with answer comparison, simple concepts, step-by-step working, mistake diagnosis, SSC shortcuts, memory rules and bilingual teach-back checks
 - SM-2-style spaced revision and an automatic mistake notebook
 - readiness, accuracy, streak, XP and seven-day progress views
 - target-date weekly planning and editable daily study time

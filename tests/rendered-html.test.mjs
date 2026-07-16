@@ -25,8 +25,9 @@ test("server-renders the ExamSaathi application shell", async () => {
 });
 
 test("ships focused CGL and CHSL content with cloud learning support", async () => {
-  const [app, styles, bank, page, layout, manifest, worker, packageJson, readme, socialCard] = await Promise.all([
+  const [app, teachingPanel, styles, bank, page, layout, manifest, worker, packageJson, readme, socialCard] = await Promise.all([
     readFile(new URL("../app/ExamSaathiApp.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/TeachingNotePanel.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/questions.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
@@ -50,6 +51,9 @@ test("ships focused CGL and CHSL content with cloud learning support", async () 
   assert.match(app, /Spaced revision queue/);
   assert.match(app, /Viral daily challenge/);
   assert.match(app, /Admin question management/);
+  assert.match(teachingPanel, /Let’s solve this like a patient teacher/);
+  assert.match(teachingPanel, /Why your option was not correct/);
+  assert.match(teachingPanel, /SSC exam shortcut/);
   assert.doesNotMatch(app, /localStorage/);
   assert.doesNotMatch(styles, /#0a6cff|#0754bd|rgba\(10,108,255/);
   assert.match(bank, /Combined Graduate Level/);
